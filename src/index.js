@@ -108,14 +108,18 @@ app.post("/messages", async (req, res) => {
   }
 });
 
-app.get("/messages", (req, res) => {
+app.get("/messages", async (req, res) => {
   const limit = req.params.limit;
   const { user } = req.headers;
 
   try {
-    const menssages = Messages.find({ name: user, to: user }).limit(limit);
-    console.log(menssages);
-    res.send(menssages);
+    if (limit){
+      const menssages = await Messages.find({$or: [{name: user}, {to: user}]}).limit(limit).toArray();
+      res.send(menssages);
+    }else{
+      const menssages = await Messages.find({$or: [{name: user}, {to: user}]}).toArray();
+      res.send(menssages);
+    }
   } catch (err) {
     console.log(err);
     res.sendStatus(500);
